@@ -1,5 +1,6 @@
 import { and, desc, eq, like, sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import {
   Bracket,
   InsertBracket,
@@ -24,14 +25,17 @@ import {
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
+let _pool: Pool | null = null;
 
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      _pool = new Pool({ connectionString: process.env.DATABASE_URL });
+      _db = drizzle(_pool);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
+      _pool = null;
     }
   }
   return _db;
@@ -70,7 +74,13 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   if (!values.lastSignedIn) values.lastSignedIn = new Date();
   if (Object.keys(updateSet).length === 0) updateSet.lastSignedIn = new Date();
 
-  await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
+  // PostgreSQL: Use ON CONFLICT for upsert
+  const existingUser = await db.select().from(users).where(eq(users.openId, user.openId)).limit(1);
+  if (existingUser.length > 0) {
+    await db.update(users).set(updateSet).where(eq(users.openId, user.openId));
+  } else {
+    await db.insert(users).values(values);
+  }
 }
 
 export async function getUserByOpenId(openId: string) {
@@ -84,8 +94,7 @@ export async function getUserByOpenId(openId: string) {
 export async function createTeam(data: InsertTeam) {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
-  const result = await db.insert(teams).values(data);
-  return result[0];
+  await db.insert(teams).values(data);
 }
 
 export async function getTeamByUserId(userId: number) {
