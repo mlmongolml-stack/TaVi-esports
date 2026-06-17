@@ -2,7 +2,6 @@
   "version": 2,
   "buildCommand": "pnpm build",
   "outputDirectory": "dist/public",
-  "nodeVersion": "20.x",
   "functions": {
     "api/index.ts": {
       "runtime": "@vercel/node@3.1.0"
