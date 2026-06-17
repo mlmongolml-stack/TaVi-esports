@@ -35,7 +35,10 @@ import {
   updateRegistrationStatus,
   updateTeam,
   updateTournament,
+  getUserByEmail,
+  getDb,
 } from "./db";
+import { users } from "../drizzle/schema";
 import { generateBracket } from "./brackets";
 
 // ─── Admin guard ──────────────────────────────────────────────────────────────
@@ -60,6 +63,36 @@ export const appRouter = router({
   // ─── Auth ──────────────────────────────────────────────────────────────────
   auth: router({
     me: publicProcedure.query((opts) => opts.ctx.user),
+    
+    loginLocal: publicProcedure
+      .input(z.object({ email: z.string().email(), nickname: z.string().min(1) }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
+        
+        // Find or create user
+        let user = await getUserByEmail(input.email);
+        if (!user) {
+          // Create new user
+          await db.insert(users).values({
+            openId: `local_${input.email}`,
+            email: input.email,
+            name: input.nickname,
+            loginMethod: "local",
+            role: input.email === "ml.mongol.ml@gmail.com" ? "admin" : "user",
+          });
+          user = await getUserByEmail(input.email);
+        }
+        
+        if (!user) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        
+        // Set session cookie
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, JSON.stringify({ userId: user.id, email: user.email }), cookieOptions);
+        
+        return { success: true, user };
+      }),
+    
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });

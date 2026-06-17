@@ -1,5 +1,4 @@
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
 import { cn } from "@/lib/utils";
 import { Menu, Shield, Trophy, X, Zap } from "lucide-react";
 import { useState } from "react";
@@ -88,9 +87,9 @@ export default function Navbar() {
                 <Trophy className="w-3.5 h-3.5" />
                 Реєстрація
               </Link>
-              <a href={getLoginUrl()} className="cyber-btn-primary text-xs py-2 px-4">
+              <Link href="/login" className="cyber-btn-primary text-xs py-2 px-4">
                 Увійти
-              </a>
+              </Link>
             </>
           )}
         </div>
@@ -145,9 +144,9 @@ export default function Navbar() {
                   <Link href="/register-team" onClick={() => setMobileOpen(false)} className="cyber-btn-outline text-sm py-2.5 text-center">
                     Реєстрація команди
                   </Link>
-                  <a href={getLoginUrl()} className="cyber-btn-primary text-sm py-2.5 text-center">
+                  <Link href="/login" onClick={() => setMobileOpen(false)} className="cyber-btn-primary text-sm py-2.5 text-center">
                     Увійти
-                  </a>
+                  </Link>
                 </>
               )}
             </div>
