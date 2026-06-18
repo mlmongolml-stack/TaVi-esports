@@ -1,5 +1,4 @@
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import {
@@ -318,7 +317,7 @@ export default function Admin() {
       <div className="container py-20 text-center max-w-md mx-auto">
         <Shield className="w-16 h-16 text-primary mx-auto mb-4" />
         <h2 className="font-display text-2xl font-bold text-foreground mb-3">Потрібна авторизація</h2>
-        <a href={getLoginUrl()} className="cyber-btn-primary"><Zap className="w-4 h-4" />Увійти</a>
+        <Link href="/login" className="cyber-btn-primary"><Zap className="w-4 h-4" />Увійти</Link>
       </div>
     );
   }

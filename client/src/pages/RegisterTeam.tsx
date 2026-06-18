@@ -1,5 +1,5 @@
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
+import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { Loader2, Plus, Trash2, Trophy, Upload, Users, Zap } from "lucide-react";
@@ -95,10 +95,10 @@ export default function RegisterTeam() {
         <Trophy className="w-16 h-16 text-primary mx-auto mb-4" />
         <h2 className="font-display text-2xl font-bold text-foreground mb-3">Потрібна авторизація</h2>
         <p className="text-muted-foreground mb-6">Увійдіть, щоб зареєструвати команду</p>
-        <a href={getLoginUrl()} className="cyber-btn-primary">
+        <Link href="/login" className="cyber-btn-primary">
           <Zap className="w-4 h-4" />
           Увійти
-        </a>
+        </Link>
       </div>
     );
   }

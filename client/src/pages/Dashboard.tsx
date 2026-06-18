@@ -1,5 +1,4 @@
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import {
@@ -117,10 +116,10 @@ export default function Dashboard() {
         <Shield className="w-16 h-16 text-primary mx-auto mb-4" />
         <h2 className="font-display text-2xl font-bold text-foreground mb-3">Потрібна авторизація</h2>
         <p className="text-muted-foreground mb-6">Увійдіть для доступу до особистого кабінету</p>
-        <a href={getLoginUrl()} className="cyber-btn-primary">
+        <Link href="/login" className="cyber-btn-primary">
           <Zap className="w-4 h-4" />
           Увійти
-        </a>
+        </Link>
       </div>
     );
   }

@@ -14,7 +14,7 @@ import {
   Zap,
 } from "lucide-react";
 import { Link } from "wouter";
-import { getLoginUrl } from "@/const";
+
 import { useAuth } from "@/_core/hooks/useAuth";
 
 function formatDate(date: Date | string | null | undefined) {
@@ -104,10 +104,10 @@ export default function Home() {
                   Зареєструвати команду
                 </Link>
               ) : (
-                <a href={getLoginUrl()} className="cyber-btn-primary">
+                <Link href="/login" className="cyber-btn-primary">
                   <Zap className="w-4 h-4" />
                   Почати зараз
-                </a>
+                </Link>
               )}
               <Link href="/tournaments" className="cyber-btn-outline">
                 Всі турніри
@@ -345,10 +345,10 @@ export default function Home() {
                   Зареєструвати команду
                 </Link>
               ) : (
-                <a href={getLoginUrl()} className="cyber-btn-primary">
+                <Link href="/login" className="cyber-btn-primary">
                   <Zap className="w-4 h-4" />
                   Увійти та зареєструватись
-                </a>
+                </Link>
               )}
               <Link href="/tournaments" className="cyber-btn-outline">
                 Переглянути турніри
