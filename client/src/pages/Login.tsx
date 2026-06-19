@@ -12,6 +12,8 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [nickname, setNickname] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [nicknameError, setNicknameError] = useState("");
 
   // Get redirect URL from query params or default to dashboard
   const redirectUrl = new URLSearchParams(window.location.search).get("redirect") || "/dashboard";
@@ -23,8 +25,23 @@ export default function Login() {
     },
     onError: (error: any) => {
       const errorMsg = error?.message || "Помилка входу";
-      console.error("Login error:", error);
-      if (errorMsg.includes("pattern")) {
+      console.error("[Login] Full error object:", error);
+      console.error("[Login] Error message:", errorMsg);
+      console.error("[Login] Error data:", error?.data);
+      
+      // Show specific field error if available
+      if (error?.data?.zodError) {
+        const zodErrors = error.data.zodError;
+        console.error("[Login] Zod errors:", zodErrors);
+        const fieldErrors = zodErrors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ');
+        toast.error(`❌ ${fieldErrors}`);
+        
+        // Set individual field errors
+        zodErrors.forEach((err: any) => {
+          if (err.path[0] === 'email') setEmailError(err.message);
+          if (err.path[0] === 'nickname') setNicknameError(err.message);
+        });
+      } else if (errorMsg.includes("pattern")) {
         toast.error("❌ Перевірте формат email та нікнейму");
       } else if (errorMsg.includes("email")) {
         toast.error("❌ Невірний формат email");
@@ -36,14 +53,26 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !nickname.trim()) {
+    
+    // Clear previous errors
+    setEmailError("");
+    setNicknameError("");
+    
+    const trimmedEmail = email.trim();
+    const trimmedNickname = nickname.trim();
+    
+    if (!trimmedEmail || !trimmedNickname) {
       toast.error("❌ Заповніть усі поля");
       return;
     }
 
+    console.log("[Login] Attempting login with:", { email: trimmedEmail, nickname: trimmedNickname });
+    console.log("[Login] Email type:", typeof trimmedEmail, "Length:", trimmedEmail.length);
+    console.log("[Login] Nickname type:", typeof trimmedNickname, "Length:", trimmedNickname.length);
+
     setIsLoading(true);
     try {
-      await loginMutation.mutateAsync({ email, nickname });
+      await loginMutation.mutateAsync({ email: trimmedEmail, nickname: trimmedNickname });
     } finally {
       setIsLoading(false);
     }
@@ -64,12 +93,17 @@ export default function Login() {
                 Email
               </label>
               <Input
-                type="email"
+                type="text"
+                inputMode="email"
                 placeholder="your@email.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-slate-800 border-cyan-500/20 text-white placeholder:text-gray-500"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setEmailError("");
+                }}
+                className={`bg-slate-800 border-cyan-500/20 text-white placeholder:text-gray-500 ${emailError ? 'border-red-500' : ''}`}
               />
+              {emailError && <p className="text-red-400 text-xs mt-1">{emailError}</p>}
             </div>
 
             <div>
@@ -80,9 +114,13 @@ export default function Login() {
                 type="text"
                 placeholder="YourNickname"
                 value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                className="bg-slate-800 border-cyan-500/20 text-white placeholder:text-gray-500"
+                onChange={(e) => {
+                  setNickname(e.target.value);
+                  setNicknameError("");
+                }}
+                className={`bg-slate-800 border-cyan-500/20 text-white placeholder:text-gray-500 ${nicknameError ? 'border-red-500' : ''}`}
               />
+              {nicknameError && <p className="text-red-400 text-xs mt-1">{nicknameError}</p>}
             </div>
 
             <Button
