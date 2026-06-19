@@ -4,19 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { TRPCClientError } from "@trpc/client";
 import { toast } from "sonner";
+import { ArrowRight } from "lucide-react";
 
 export default function Login() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [email, setEmail] = useState("");
   const [nickname, setNickname] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Get redirect URL from query params or default to dashboard
+  const redirectUrl = new URLSearchParams(window.location.search).get("redirect") || "/dashboard";
+
   const loginMutation = trpc.auth.loginLocal.useMutation({
     onSuccess: () => {
       toast.success("✅ Вхід успішний!");
-      setLocation("/dashboard");
+      setLocation(redirectUrl);
     },
     onError: (error: any) => {
       toast.error(`❌ ${error?.message || "Помилка входу"}`);
@@ -77,24 +80,16 @@ export default function Login() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white font-semibold py-2 rounded-lg transition-all duration-300"
+              className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white font-semibold py-2 rounded-lg transition-all duration-300 flex items-center justify-center gap-2"
             >
               {isLoading ? "Завантаження..." : "Увійти"}
+              {!isLoading && <ArrowRight className="w-4 h-4" />}
             </Button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-cyan-500/20">
-            <p className="text-gray-400 text-sm mb-4">
-              Немаєте облікового запису?
-            </p>
-            <Button
-              onClick={() => setLocation("/register-team")}
-              variant="outline"
-              className="w-full border-purple-500/50 text-purple-400 hover:bg-purple-500/10"
-            >
-              Реєстрація команди
-            </Button>
-          </div>
+          <p className="text-center text-gray-400 text-sm mt-6">
+            Перший вхід автоматично створить акаунт
+          </p>
         </div>
       </Card>
     </div>

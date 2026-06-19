@@ -89,15 +89,16 @@ export default function RegisterTeam() {
     );
   }
 
+  // If not authenticated, redirect to login with return URL
   if (!isAuthenticated) {
     return (
       <div className="container py-20 text-center max-w-md mx-auto">
         <Trophy className="w-16 h-16 text-primary mx-auto mb-4" />
         <h2 className="font-display text-2xl font-bold text-foreground mb-3">Потрібна авторизація</h2>
         <p className="text-muted-foreground mb-6">Увійдіть, щоб зареєструвати команду</p>
-        <Link href="/login" className="cyber-btn-primary">
+        <Link href="/login?redirect=/register-team" className="cyber-btn-primary">
           <Zap className="w-4 h-4" />
-          Увійти
+          Увійти та зареєструвати команду
         </Link>
       </div>
     );
@@ -108,213 +109,177 @@ export default function RegisterTeam() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-2">
-          <div className="h-px w-6 bg-primary" />
-          <span className="text-xs font-semibold uppercase tracking-widest text-primary">Команди</span>
+          <div className="h-px w-8 bg-primary" />
+          <span className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">
+            Реєстрація
+          </span>
         </div>
-        <h1 className="font-display text-3xl font-black uppercase text-foreground mb-2">
-          Реєстрація команди
+        <h1 className="font-display text-4xl font-black uppercase leading-none">
+          <span className="block text-foreground">Зареєструвати</span>
+          <span className="block neon-blue">Команду</span>
         </h1>
-        <p className="text-muted-foreground">Заповніть форму для участі у турнірах TaVi Esports</p>
+        <p className="text-muted-foreground mt-4 max-w-xl">
+          Заповніть форму, щоб зареєструвати вашу команду на турнір Mobile Legends: Bang Bang
+        </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-8">
         {/* Team Info */}
-        <div className="cyber-card p-6 space-y-4">
-          <h2 className="font-heading text-lg font-bold text-foreground flex items-center gap-2">
+        <div className="cyber-card p-6">
+          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
             <Trophy className="w-5 h-5 text-primary" />
             Інформація про команду
           </h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Назва команди *</label>
+              <input
+                type="text"
+                value={teamName}
+                onChange={(e) => setTeamName(e.target.value)}
+                placeholder="Назва вашої команди"
+                className="w-full px-4 py-2 bg-background border border-primary/20 rounded text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">
-              Назва команди <span className="text-destructive">*</span>
-            </label>
-            <input
-              type="text"
-              value={teamName}
-              onChange={(e) => setTeamName(e.target.value)}
-              placeholder="Введіть назву команди"
-              maxLength={128}
-              className="w-full bg-input border border-border rounded px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">
-              <Upload className="w-4 h-4 inline mr-1" />
-              URL логотипу команди
-            </label>
-            <input
-              type="url"
-              value={logoUrl}
-              onChange={(e) => setLogoUrl(e.target.value)}
-              placeholder="https://example.com/logo.png"
-              className="w-full bg-input border border-border rounded px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
-            />
-            {logoUrl && (
-              <div className="mt-2 flex items-center gap-3">
-                <img src={logoUrl} alt="Logo preview" className="w-12 h-12 rounded object-cover border border-border" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                <span className="text-xs text-muted-foreground">Попередній перегляд</span>
-              </div>
-            )}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Логотип команди (URL)</label>
+              <input
+                type="url"
+                value={logoUrl}
+                onChange={(e) => setLogoUrl(e.target.value)}
+                placeholder="https://example.com/logo.png"
+                className="w-full px-4 py-2 bg-background border border-primary/20 rounded text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
           </div>
         </div>
 
         {/* Captain Info */}
-        <div className="cyber-card p-6 space-y-4">
-          <h2 className="font-heading text-lg font-bold text-foreground flex items-center gap-2">
-            <Zap className="w-5 h-5 text-accent" />
+        <div className="cyber-card p-6">
+          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+            <Users className="w-5 h-5 text-secondary" />
             Інформація про капітана
           </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Нік капітана <span className="text-destructive">*</span>
-              </label>
+              <label className="block text-sm font-medium text-foreground mb-2">Нік капітана *</label>
               <input
                 type="text"
                 value={captainNick}
                 onChange={(e) => setCaptainNick(e.target.value)}
-                placeholder="GameNick123"
-                maxLength={64}
-                className="w-full bg-input border border-border rounded px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
-                required
+                placeholder="Ваш нік у грі"
+                className="w-full px-4 py-2 bg-background border border-primary/20 rounded text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
               />
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Telegram</label>
+                <input
+                  type="text"
+                  value={captainTelegram}
+                  onChange={(e) => setCaptainTelegram(e.target.value)}
+                  placeholder="@username"
+                  className="w-full px-4 py-2 bg-background border border-primary/20 rounded text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Discord</label>
+                <input
+                  type="text"
+                  value={captainDiscord}
+                  onChange={(e) => setCaptainDiscord(e.target.value)}
+                  placeholder="username#1234"
+                  className="w-full px-4 py-2 bg-background border border-primary/20 rounded text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+                />
+              </div>
+            </div>
+
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                MLBB Player ID
-              </label>
+              <label className="block text-sm font-medium text-foreground mb-2">MLBB ID</label>
               <input
                 type="text"
                 value={mlbbPlayerId}
                 onChange={(e) => setMlbbPlayerId(e.target.value)}
                 placeholder="123456789"
-                maxLength={64}
-                className="w-full bg-input border border-border rounded px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Telegram капітана
-              </label>
-              <input
-                type="text"
-                value={captainTelegram}
-                onChange={(e) => setCaptainTelegram(e.target.value)}
-                placeholder="@username"
-                maxLength={64}
-                className="w-full bg-input border border-border rounded px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Discord капітана
-              </label>
-              <input
-                type="text"
-                value={captainDiscord}
-                onChange={(e) => setCaptainDiscord(e.target.value)}
-                placeholder="username#0000"
-                maxLength={64}
-                className="w-full bg-input border border-border rounded px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
+                className="w-full px-4 py-2 bg-background border border-primary/20 rounded text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
               />
             </div>
           </div>
         </div>
 
-        {/* Roster */}
-        <div className="cyber-card p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-heading text-lg font-bold text-foreground flex items-center gap-2">
-              <Users className="w-5 h-5 text-secondary" />
-              Склад команди
-              <span className="text-sm font-normal text-muted-foreground">({players.length}/7)</span>
+        {/* Players */}
+        <div className="cyber-card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <Users className="w-5 h-5 text-accent" />
+              Склад команди ({players.length}/7)
             </h2>
             {players.length < 7 && (
               <button
                 type="button"
                 onClick={addPlayer}
-                className="cyber-btn-outline text-xs py-1.5 px-3"
+                className="cyber-btn-sm flex items-center gap-1"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-4 h-4" />
                 Додати гравця
               </button>
             )}
           </div>
 
-          <div className="space-y-3">
-            {players.map((player, i) => (
-              <div key={i} className="bg-muted/30 border border-border/60 rounded-lg p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Гравець {i + 1}
-                    {player.isCaptain && <span className="ml-2 text-accent">★ Капітан</span>}
+          <div className="space-y-4">
+            {players.map((player, idx) => (
+              <div key={idx} className="p-4 border border-primary/20 rounded bg-background/50">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-primary">
+                    Гравець {idx + 1} {player.isCaptain && "👑 (Капітан)"}
                   </span>
-                  <div className="flex items-center gap-2">
-                    <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={player.isCaptain}
-                        onChange={(e) => {
-                          // Only one captain
-                          const updated = players.map((p, idx) => ({ ...p, isCaptain: idx === i ? e.target.checked : false }));
-                          setPlayers(updated);
-                        }}
-                        className="w-3.5 h-3.5 accent-primary"
-                      />
-                      Капітан
-                    </label>
-                    {players.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removePlayer(i)}
-                        className="text-destructive hover:text-destructive/80 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
+                  {idx > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => removePlayer(idx)}
+                      className="text-destructive hover:text-destructive/80"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs text-muted-foreground mb-1">
-                      Нікнейм <span className="text-destructive">*</span>
-                    </label>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1">Нік *</label>
                     <input
                       type="text"
                       value={player.nickname}
-                      onChange={(e) => updatePlayer(i, "nickname", e.target.value)}
-                      placeholder="GameNick"
-                      maxLength={64}
-                      className="w-full bg-input border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
-                      required
+                      onChange={(e) => updatePlayer(idx, "nickname", e.target.value)}
+                      placeholder="Нік гравця"
+                      className="w-full px-3 py-2 bg-background border border-primary/20 rounded text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary text-sm"
                     />
                   </div>
+
                   <div>
-                    <label className="block text-xs text-muted-foreground mb-1">MLBB ID</label>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1">MLBB ID</label>
                     <input
                       type="text"
                       value={player.mlbbPlayerId}
-                      onChange={(e) => updatePlayer(i, "mlbbPlayerId", e.target.value)}
-                      placeholder="123456789"
-                      maxLength={64}
-                      className="w-full bg-input border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
+                      onChange={(e) => updatePlayer(idx, "mlbbPlayerId", e.target.value)}
+                      placeholder="ID"
+                      className="w-full px-3 py-2 bg-background border border-primary/20 rounded text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary text-sm"
                     />
                   </div>
+
                   <div>
-                    <label className="block text-xs text-muted-foreground mb-1">Роль</label>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1">Роль</label>
                     <select
                       value={player.role}
-                      onChange={(e) => updatePlayer(i, "role", e.target.value)}
-                      className="w-full bg-input border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary transition-colors"
+                      onChange={(e) => updatePlayer(idx, "role", e.target.value)}
+                      className="w-full px-3 py-2 bg-background border border-primary/20 rounded text-foreground focus:outline-none focus:border-primary text-sm"
                     >
-                      <option value="">Оберіть роль</option>
-                      {MLBB_ROLES.map((r) => (
-                        <option key={r} value={r}>{r}</option>
+                      <option value="">Виберіть роль</option>
+                      {MLBB_ROLES.map((role) => (
+                        <option key={role} value={role}>{role}</option>
                       ))}
                     </select>
                   </div>
@@ -325,23 +290,28 @@ export default function RegisterTeam() {
         </div>
 
         {/* Submit */}
-        <button
-          type="submit"
-          disabled={registerMutation.isPending}
-          className={cn("cyber-btn-primary w-full py-3 text-base", registerMutation.isPending && "opacity-60 cursor-not-allowed")}
-        >
-          {registerMutation.isPending ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Реєстрація...
-            </>
-          ) : (
-            <>
-              <Trophy className="w-4 h-4" />
-              Зареєструвати команду
-            </>
-          )}
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            disabled={registerMutation.isPending}
+            className="cyber-btn-primary flex-1 flex items-center justify-center gap-2"
+          >
+            {registerMutation.isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Реєстрація...
+              </>
+            ) : (
+              <>
+                <Trophy className="w-4 h-4" />
+                Зареєструвати команду
+              </>
+            )}
+          </button>
+          <Link href="/tournaments" className="cyber-btn-outline flex-1 text-center">
+            Скасувати
+          </Link>
+        </div>
       </form>
     </div>
   );
