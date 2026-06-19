@@ -65,7 +65,7 @@ export const appRouter = router({
     me: publicProcedure.query((opts) => opts.ctx.user),
     
     loginLocal: publicProcedure
-      .input(z.object({ email: z.string().email(), nickname: z.string().min(1) }))
+      .input(z.object({ email: z.string().email("Invalid email format"), nickname: z.string().min(1, "Nickname required") }))
       .mutation(async ({ input, ctx }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });

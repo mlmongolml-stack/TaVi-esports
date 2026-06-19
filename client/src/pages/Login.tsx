@@ -22,7 +22,15 @@ export default function Login() {
       setLocation(redirectUrl);
     },
     onError: (error: any) => {
-      toast.error(`❌ ${error?.message || "Помилка входу"}`);
+      const errorMsg = error?.message || "Помилка входу";
+      console.error("Login error:", error);
+      if (errorMsg.includes("pattern")) {
+        toast.error("❌ Перевірте формат email та нікнейму");
+      } else if (errorMsg.includes("email")) {
+        toast.error("❌ Невірний формат email");
+      } else {
+        toast.error(`❌ ${errorMsg}`);
+      }
     },
   });
 
