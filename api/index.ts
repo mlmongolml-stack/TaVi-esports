@@ -1,60 +1,33 @@
-import express, { Request, Response } from "express";
-import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { appRouter } from "../server/routers";
-import { createContext } from "../server/_core/context";
+import express from "express";
 
 const app = express();
 
-// Middleware
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb", extended: true }));
+app.use(express.json());
 
-// Health check
-app.get("/api/health", (req: Request, res: Response) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
+// Test endpoint
+app.get("/api/test", (req, res) => {
+  res.json({ message: "API is working" });
 });
 
-// Debug endpoint to check environment
-app.get("/api/debug/env", (req: Request, res: Response) => {
-  const hasDbUrl = !!process.env.DATABASE_URL;
-  const dbUrlPreview = process.env.DATABASE_URL ? 
-    process.env.DATABASE_URL.split('@')[1]?.split('/')[0] || 'unknown' : 
-    'NOT SET';
-  
-  res.json({
-    env: process.env.NODE_ENV,
-    hasDatabase: hasDbUrl,
-    databaseHost: dbUrlPreview,
-    timestamp: new Date().toISOString(),
-  });
+// tRPC endpoint - will add after testing
+app.post("/api/trpc/auth.loginLocal", async (req, res) => {
+  try {
+    const { json } = req.body;
+    const { email, nickname } = json;
+    
+    console.log("[API] Login attempt:", { email, nickname });
+    
+    // For now, just return success
+    res.json([{ result: { data: { success: true, message: "Test response" } } }]);
+  } catch (error) {
+    console.error("[API] Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
-// tRPC endpoint
-app.use(
-  "/api/trpc",
-  createExpressMiddleware({
-    router: appRouter,
-    createContext,
-    onError: ({ path, error }) => {
-      console.error(`[tRPC] Error at ${path}:`, error);
-    },
-  })
-);
-
-// Fallback for root
-app.get("/", (req: Request, res: Response) => {
-  res.json({ message: "TaVi Esports API Server" });
-});
-
-// 404 handler
-app.use((req: Request, res: Response) => {
+// Fallback
+app.use((req, res) => {
   res.status(404).json({ error: "Not found" });
-});
-
-// Error handler
-app.use((err: any, req: Request, res: Response) => {
-  console.error("[API] Unhandled error:", err);
-  res.status(500).json({ error: "Internal server error", message: err.message });
 });
 
 export default app;
