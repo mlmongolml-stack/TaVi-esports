@@ -66,8 +66,15 @@ export const appRouter = router({
     
     loginLocal: publicProcedure
       .input(z.object({ 
-        email: z.string().email("Invalid email format").transform(e => e.toLowerCase().trim()),
-        nickname: z.string().min(1, "Nickname required").transform(n => n.trim())
+        email: z.string()
+          .min(5, "Email too short")
+          .max(320, "Email too long")
+          .refine(e => e.includes("@"), "Email must contain @")
+          .transform(e => e.toLowerCase().trim()),
+        nickname: z.string()
+          .min(3, "Nickname must be at least 3 characters")
+          .max(32, "Nickname must be at most 32 characters")
+          .transform(n => n.trim())
       }))
       .mutation(async ({ input, ctx }) => {
         const db = await getDb();

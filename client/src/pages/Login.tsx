@@ -24,27 +24,29 @@ export default function Login() {
       setLocation(redirectUrl);
     },
     onError: (error: any) => {
-      const errorMsg = error?.message || "Помилка входу";
-      console.error("[Login] Full error object:", error);
-      console.error("[Login] Error message:", errorMsg);
+      console.error("[Login] Full error:", error);
+      console.error("[Login] Error code:", error?.code);
+      console.error("[Login] Error message:", error?.message);
       console.error("[Login] Error data:", error?.data);
+      
+      const errorMsg = error?.message || "Помилка входу";
       
       // Show specific field error if available
       if (error?.data?.zodError) {
         const zodErrors = error.data.zodError;
-        console.error("[Login] Zod errors:", zodErrors);
-        const fieldErrors = zodErrors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ');
-        toast.error(`❌ ${fieldErrors}`);
+        console.error("[Login] Zod validation errors:", zodErrors);
         
         // Set individual field errors
         zodErrors.forEach((err: any) => {
-          if (err.path[0] === 'email') setEmailError(err.message);
-          if (err.path[0] === 'nickname') setNicknameError(err.message);
+          if (err.path?.[0] === 'email') {
+            setEmailError(err.message);
+            toast.error(`❌ Email: ${err.message}`);
+          }
+          if (err.path?.[0] === 'nickname') {
+            setNicknameError(err.message);
+            toast.error(`❌ Нікнейм: ${err.message}`);
+          }
         });
-      } else if (errorMsg.includes("pattern")) {
-        toast.error("❌ Перевірте формат email та нікнейму");
-      } else if (errorMsg.includes("email")) {
-        toast.error("❌ Невірний формат email");
       } else {
         toast.error(`❌ ${errorMsg}`);
       }
@@ -58,21 +60,49 @@ export default function Login() {
     setEmailError("");
     setNicknameError("");
     
-    const trimmedEmail = email.trim();
+    const trimmedEmail = email.trim().toLowerCase();
     const trimmedNickname = nickname.trim();
     
-    if (!trimmedEmail || !trimmedNickname) {
-      toast.error("❌ Заповніть усі поля");
+    // Client-side validation
+    if (!trimmedEmail) {
+      setEmailError("Email обов'язковий");
+      toast.error("❌ Заповніть email");
+      return;
+    }
+    
+    if (!trimmedNickname) {
+      setNicknameError("Нікнейм обов'язковий");
+      toast.error("❌ Заповніть нікнейм");
       return;
     }
 
-    console.log("[Login] Attempting login with:", { email: trimmedEmail, nickname: trimmedNickname });
-    console.log("[Login] Email type:", typeof trimmedEmail, "Length:", trimmedEmail.length);
-    console.log("[Login] Nickname type:", typeof trimmedNickname, "Length:", trimmedNickname.length);
+    // Basic email format check (not strict)
+    if (!trimmedEmail.includes("@")) {
+      setEmailError("Невірний email");
+      toast.error("❌ Email повинен містити @");
+      return;
+    }
+
+    // Nickname length check
+    if (trimmedNickname.length < 3) {
+      setNicknameError("Мінімум 3 символи");
+      toast.error("❌ Нікнейм: мінімум 3 символи");
+      return;
+    }
+
+    if (trimmedNickname.length > 32) {
+      setNicknameError("Максимум 32 символи");
+      toast.error("❌ Нікнейм: максимум 32 символи");
+      return;
+    }
+
+    console.log("[Login] Submitting:", { email: trimmedEmail, nickname: trimmedNickname });
 
     setIsLoading(true);
     try {
       await loginMutation.mutateAsync({ email: trimmedEmail, nickname: trimmedNickname });
+    } catch (err) {
+      console.error("[Login] Mutation error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -121,6 +151,7 @@ export default function Login() {
                 className={`bg-slate-800 border-cyan-500/20 text-white placeholder:text-gray-500 ${nicknameError ? 'border-red-500' : ''}`}
               />
               {nicknameError && <p className="text-red-400 text-xs mt-1">{nicknameError}</p>}
+              <p className="text-gray-500 text-xs mt-1">3-32 символи, букви, цифри, _, -</p>
             </div>
 
             <Button
