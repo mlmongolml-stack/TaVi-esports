@@ -14,6 +14,21 @@ app.get("/api/health", (req: Request, res: Response) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
+// Debug endpoint to check environment
+app.get("/api/debug/env", (req: Request, res: Response) => {
+  const hasDbUrl = !!process.env.DATABASE_URL;
+  const dbUrlPreview = process.env.DATABASE_URL ? 
+    process.env.DATABASE_URL.split('@')[1]?.split('/')[0] || 'unknown' : 
+    'NOT SET';
+  
+  res.json({
+    env: process.env.NODE_ENV,
+    hasDatabase: hasDbUrl,
+    databaseHost: dbUrlPreview,
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // tRPC endpoint
 app.use(
   "/api/trpc",
