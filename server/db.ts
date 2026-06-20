@@ -30,13 +30,18 @@ let _pool: Pool | null = null;
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
+      console.log("[Database] Connecting to:", process.env.DATABASE_URL?.split('@')[1] || 'unknown');
       _pool = new Pool({ connectionString: process.env.DATABASE_URL });
       _db = drizzle(_pool);
+      console.log("[Database] Connected successfully");
     } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
+      console.error("[Database] Failed to connect:", error instanceof Error ? error.message : error);
       _db = null;
       _pool = null;
     }
+  }
+  if (!_db) {
+    console.warn("[Database] No database connection available");
   }
   return _db;
 }
