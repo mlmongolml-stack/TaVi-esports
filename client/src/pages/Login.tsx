@@ -3,12 +3,11 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { ArrowRight } from "lucide-react";
 
 export default function Login() {
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
   const [email, setEmail] = useState("");
   const [nickname, setNickname] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -17,41 +16,6 @@ export default function Login() {
 
   // Get redirect URL from query params or default to dashboard
   const redirectUrl = new URLSearchParams(window.location.search).get("redirect") || "/dashboard";
-
-  const loginMutation = trpc.auth.loginLocal.useMutation({
-    onSuccess: () => {
-      toast.success("✅ Вхід успішний!");
-      setLocation(redirectUrl);
-    },
-    onError: (error: any) => {
-      console.error("[Login] Full error:", error);
-      console.error("[Login] Error code:", error?.code);
-      console.error("[Login] Error message:", error?.message);
-      console.error("[Login] Error data:", error?.data);
-      
-      const errorMsg = error?.message || "Помилка входу";
-      
-      // Show specific field error if available
-      if (error?.data?.zodError) {
-        const zodErrors = error.data.zodError;
-        console.error("[Login] Zod validation errors:", zodErrors);
-        
-        // Set individual field errors
-        zodErrors.forEach((err: any) => {
-          if (err.path?.[0] === 'email') {
-            setEmailError(err.message);
-            toast.error(`❌ Email: ${err.message}`);
-          }
-          if (err.path?.[0] === 'nickname') {
-            setNicknameError(err.message);
-            toast.error(`❌ Нікнейм: ${err.message}`);
-          }
-        });
-      } else {
-        toast.error(`❌ ${errorMsg}`);
-      }
-    },
-  });
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,7 +40,7 @@ export default function Login() {
       return;
     }
 
-    // Basic email format check (not strict)
+    // Basic email format check
     if (!trimmedEmail.includes("@")) {
       setEmailError("Невірний email");
       toast.error("❌ Email повинен містити @");
@@ -84,9 +48,9 @@ export default function Login() {
     }
 
     // Nickname length check
-    if (trimmedNickname.length < 3) {
-      setNicknameError("Мінімум 3 символи");
-      toast.error("❌ Нікнейм: мінімум 3 символи");
+    if (trimmedNickname.length < 1) {
+      setNicknameError("Нікнейм обов'язковий");
+      toast.error("❌ Заповніть нікнейм");
       return;
     }
 
@@ -100,9 +64,33 @@ export default function Login() {
 
     setIsLoading(true);
     try {
-      await loginMutation.mutateAsync({ email: trimmedEmail, nickname: trimmedNickname });
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: trimmedEmail,
+          nickname: trimmedNickname,
+        }),
+      });
+
+      const data = await response.json();
+      console.log("[Login] Response:", data);
+
+      if (!response.ok) {
+        toast.error(`❌ ${data.error || "Login failed"}`);
+        return;
+      }
+
+      // Success
+      toast.success("✅ Вхід успішний!");
+      
+      // Redirect after a short delay
+      setTimeout(() => {
+        setLocation(redirectUrl);
+      }, 500);
     } catch (err) {
-      console.error("[Login] Mutation error:", err);
+      console.error("[Login] Error:", err);
+      toast.error("❌ Помилка мережі. Спробуйте ще раз.");
     } finally {
       setIsLoading(false);
     }
@@ -125,7 +113,7 @@ export default function Login() {
               <Input
                 type="text"
                 inputMode="email"
-                placeholder="your@email.com"
+                placeholder="ml.mongol.ml@gmail.com"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
@@ -142,7 +130,7 @@ export default function Login() {
               </label>
               <Input
                 type="text"
-                placeholder="YourNickname"
+                placeholder="Akusher"
                 value={nickname}
                 onChange={(e) => {
                   setNickname(e.target.value);
@@ -151,7 +139,7 @@ export default function Login() {
                 className={`bg-slate-800 border-cyan-500/20 text-white placeholder:text-gray-500 ${nicknameError ? 'border-red-500' : ''}`}
               />
               {nicknameError && <p className="text-red-400 text-xs mt-1">{nicknameError}</p>}
-              <p className="text-gray-500 text-xs mt-1">3-32 символи, букви, цифри, _, -</p>
+              <p className="text-gray-500 text-xs mt-1">1-32 символи</p>
             </div>
 
             <Button

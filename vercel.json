@@ -3,9 +3,9 @@
   "buildCommand": "pnpm build",
   "outputDirectory": "dist/public",
   "functions": {
-    "api/trpc.ts": {
+    "api/login.ts": {
       "runtime": "@vercel/node@3.1.0",
-      "maxDuration": 30
+      "maxDuration": 10
     }
   }
 }
